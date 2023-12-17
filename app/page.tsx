@@ -9,10 +9,10 @@ export default function Component() {
       <header className="flex justify-between items-center px-8 py-4">
         <h1 className="text-2xl font-bold">PeerReview</h1>
         <div className="flex space-x-4">
-          <SignUpButton afterSignUpUrl="/meetings">
+          <SignUpButton afterSignUpUrl="/portal/meetings">
             <Button variant="outline">Sign Up</Button>
           </SignUpButton>
-          <SignInButton afterSignInUrl="/meetings">
+          <SignInButton afterSignInUrl="/portal/meetings">
             <Button className="hover:bg-gray-200 transition-colors duration-200">
               Sign In
             </Button>
