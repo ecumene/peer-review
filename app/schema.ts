@@ -6,6 +6,7 @@ export const meets = sqliteTable("meets", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   dueDate: integer("due_date", { mode: "timestamp" }).notNull(),
+  orgId: text("org_id").notNull(),
   creatorId: text("creator_id").notNull(),
 });
 export const meetsRelations = relations(meets, ({ one, many }) => ({
@@ -37,6 +38,7 @@ export const memos = sqliteTable("memos", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   dueDate: integer("due_date", { mode: "timestamp" }).notNull(),
+  orgId: text("org_id").notNull(),
   authorId: text("author_id").notNull(),
   assignedBy: text("assigned_by").notNull(),
 });
@@ -48,6 +50,7 @@ export const comments = sqliteTable("comments", {
   memoId: integer("memo_id")
     .notNull()
     .references(() => memos.id),
+  orgId: text("org_id").notNull(),
   authorId: text("author_id").notNull(),
   timestamp: integer("timestamp", { mode: "timestamp" }).$defaultFn(
     () => new Date()

@@ -2,6 +2,7 @@ CREATE TABLE meets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
+    org_id TEXT NOT NULL,
     creator_id TEXT NOT NULL,
     due_date DATE NOT NULL
 );
@@ -18,6 +19,7 @@ CREATE TABLE memos (
     title TEXT NOT NULL,
     content TEXT NOT NULL,
     due_date DATE NOT NULL,
+    org_id TEXT NOT NULL,
     author_id TEXT NOT NULL,
     assigned_by TEXT NOT NULL
 );
@@ -26,6 +28,7 @@ CREATE TABLE comments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     content TEXT NOT NULL,
     memo_id INTEGER NOT NULL,
+    org_id TEXT NOT NULL,
     author_id TEXT NOT NULL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (memo_id) REFERENCES memos(id)

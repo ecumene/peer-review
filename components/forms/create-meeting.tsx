@@ -16,13 +16,13 @@ import {
 import { useForm } from "react-hook-form";
 
 import * as z from "zod";
-import { useOrganization } from "@clerk/nextjs";
 import { createMeetingSchema } from "@/lib/zod";
+import { useParams } from "next/navigation";
 
 export type FormData = z.infer<typeof createMeetingSchema>;
 
 type Props = {
-  onSubmit: (data: FormData) => Promise<void>;
+  onSubmit: (slug: string, data: FormData) => Promise<void>;
   defaultValues?: FormData;
   submitText?: string;
 };
@@ -32,16 +32,14 @@ export default function CreateAMeeting({
   defaultValues,
   submitText = "Schedule Meeting",
 }: Props) {
-  const { memberships } = useOrganization({ memberships: {} });
-  //memberships.data has the user list
-
+  const { slug } = useParams<{ slug: string }>();
   const form = useForm<FormData>({
     defaultValues,
     resolver: zodResolver(createMeetingSchema),
   });
 
   const handleSubmit = async (data: any) => {
-    await onSubmit(data);
+    await onSubmit(slug, data);
   };
 
   return (
@@ -97,21 +95,6 @@ export default function CreateAMeeting({
               </FormDescription>
               <FormControl>
                 <Input id="due-date" type="date" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="invitees"
-          disabled
-          render={({ field }) => (
-            <FormItem className="space-y-2">
-              <FormLabel htmlFor="invitees">Invitees</FormLabel>
-              <FormDescription>Invitees to this meeting</FormDescription>
-              <FormControl>
-                <Input id="invitees" placeholder="Enter invitees" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

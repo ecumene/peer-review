@@ -1,11 +1,13 @@
 "use client";
-import { OrganizationList } from "@clerk/nextjs";
 
-export default function Portal() {
+import { OrganizationSwitcher } from "@clerk/nextjs";
+
+export default function OrgSwitcher() {
   return (
-    <OrganizationList
+    <OrganizationSwitcher
       afterSelectOrganizationUrl={(org) => `/portal/${org.slug}`}
       afterCreateOrganizationUrl={(org) => `/portal/${org.slug}`}
+      afterLeaveOrganizationUrl="/"
       hidePersonal
     />
   );

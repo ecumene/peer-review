@@ -6,13 +6,19 @@ import clsx from "clsx";
 export default function Component() {
   return (
     <>
-      <header className="flex justify-between items-center px-8 py-4">
-        <h1 className="text-2xl font-bold">PeerReview</h1>
+      <header className="flex justify-between items-center px-8 py-4 h-20">
+        <h1 className="text-2xl font-bold">
+          <Link href="/">PeerReview</Link>
+        </h1>
         <div className="flex space-x-4">
-          <SignUpButton afterSignUpUrl="/portal/meetings">
+          <SignUpButton
+            redirectUrl={`${process.env.NEXT_PUBLIC_APP_URL}/portal`}
+          >
             <Button variant="outline">Sign Up</Button>
           </SignUpButton>
-          <SignInButton afterSignInUrl="/portal/meetings">
+          <SignInButton
+            afterSignInUrl={`${process.env.NEXT_PUBLIC_APP_URL}/portal`}
+          >
             <Button className="hover:bg-gray-200 transition-colors duration-200">
               Sign In
             </Button>

@@ -28,6 +28,7 @@ import { Meet, MeetUser, meets } from "@/app/schema";
 import UserList from "@/components/ui/user-list";
 import { Suspense } from "react";
 import { eq, not } from "drizzle-orm";
+import { slugOrgGuard } from "@/lib/auth-utils";
 
 const meetingList = (list: (Meet & { users: MeetUser[] })[]) =>
   list.map((meet) => (
@@ -60,27 +61,31 @@ const meetingList = (list: (Meet & { users: MeetUser[] })[]) =>
             })}
           </p>
         </div>
-        <Suspense fallback={<UserList.Skeleton />}>
+        <Suspense fallback={<UserList.Skeleton number={meet.users.length} />}>
           <UserList ids={meet.users.map(({ userId }) => userId)} />
         </Suspense>
       </CardContent>
     </Card>
   ));
 
-export default async function Page() {
+type Params = {
+  slug: string;
+};
+
+export default async function Page({ params }: { params: Params }) {
+  const { slug } = params;
+
   const user = (await currentUser())!;
-  const createdByYou = await db.query.meets.findMany({
-    where: (meets, { eq }) => eq(meets.creatorId, user.id),
+  const org = await slugOrgGuard(user.id, slug);
+
+  const orgMeetings = await db.query.meets.findMany({
+    where: (meets, { eq }) => eq(meets.orgId, org.id),
     with: { users: true },
   });
-  const attending = await db.query.meets.findMany({
-    where: not(eq(meets.creatorId, user.id)),
-    with: {
-      users: {
-        where: (user, { eq }) => eq(user.userId, user.id),
-      },
-    },
-  });
+
+  const attending = orgMeetings.filter((m) => m.creatorId !== user.id);
+  const createdByYou = orgMeetings.filter((m) => m.creatorId === user.id);
+
   return (
     <>
       <section className="container mx-auto p-4 md:p-6">
@@ -149,7 +154,7 @@ export default async function Page() {
               </Link>
             </div>
             <div className="grid gap-4">
-              {attending.length === 0 && createdByYou.length === 0 && (
+              {orgMeetings.length === 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle>No Upcoming Meetings</CardTitle>

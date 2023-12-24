@@ -45,11 +45,10 @@ export default async function Page(props: Props) {
     },
   });
 
-  const handleUpdate = async (d: FormData) => {
+  const handleUpdate = async (_: string, d: FormData) => {
     "use server";
 
     const parsed = createMeetingSchema.parse(d);
-    console.log(new Date(parsed.dueDate));
     await db
       .update(meets)
       .set({
