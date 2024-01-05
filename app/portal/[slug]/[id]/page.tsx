@@ -19,13 +19,14 @@ import UserTable from "@/components/forms/user-table";
 import CreateAMeeting, {
   type FormData,
 } from "@/components/forms/create-meeting";
-import { currentUser } from "@clerk/nextjs";
 import { createMeetingSchema } from "@/lib/zod";
+import { clerkClient } from "@clerk/nextjs";
+import InviteUser from "@/components/forms/invite-users";
+import { createAttendee, removeAttendee } from "./actions";
 
 type Props = {
-  params: {
-    id: string;
-  };
+  params: { slug: string; id: string };
+  searchParams: { modal: string };
 };
 
 const toFormData = (meeting: Meet): FormData => ({
@@ -33,14 +34,45 @@ const toFormData = (meeting: Meet): FormData => ({
   dueDate: format(meeting.dueDate, "y-MM-dd"),
 });
 
-export default async function Page(props: Props) {
-  const id = parseInt(props.params.id, 10);
+type AssigneeUsersTable = { slug: string; ids: string[]; meetId: number };
+async function AssigneeTable({ slug, ids, meetId }: AssigneeUsersTable) {
+  const users = ids
+    ? (await clerkClient.users.getUserList()).map(
+        ({ id, firstName, lastName, imageUrl, emailAddresses }) => ({
+          id,
+          firstName,
+          lastName,
+          imageUrl,
+          emailAddresses: emailAddresses.map(
+            ({ emailAddress }) => emailAddress
+          ),
+        })
+      )
+    : [];
+  const filteredUsers = users.filter(({ id }) => ids.includes(id));
+  const removeUser = async (user: { id: string }) => {
+    "use server";
+
+    await removeAttendee(slug, { userId: user.id, meetId });
+  };
+
+  return (
+    <div>
+      <InviteUser meetId={meetId} users={users} onSubmit={createAttendee} />
+      <UserTable users={filteredUsers} onRemoveClick={removeUser} />
+    </div>
+  );
+}
+
+export default async function Page({ params, searchParams }: Props) {
+  const modal = searchParams.modal;
+  const id = parseInt(params.id, 10);
   if (!id) return <>Invalid ID provided</>;
   const meeting = await db.query.meets.findFirst({
     where: eq(meets.id, id),
     with: {
       users: {
-        where: (user, { eq }) => eq(user.userId, user.id),
+        where: (user, { eq }) => eq(user.userId, user.userId),
       },
     },
   });
@@ -77,16 +109,24 @@ export default async function Page(props: Props) {
         </div>
         <div className="flex-1 flex flex-col gap-8">
           <div>
-            <h2 className="text-lg font-semibold">
-              Meeting Attendees and Writers
-            </h2>
-            <div className="text-sm text-slate-500 mb-6">
-              Who is participating in the meeting or writing memos.
+            <div className="flex justify-between items-center">
+              <div className="flex-col">
+                <h2 className="text-lg font-semibold">
+                  Meeting Attendees and Writers
+                </h2>
+                <div className="text-sm text-slate-500 mb-6">
+                  Who is participating in the meeting or writing memos.
+                </div>
+              </div>
             </div>
             <Suspense
               fallback={<UserList.Skeleton number={meeting.users.length} />}
             >
-              <UserTable ids={meeting.users.map(({ userId }) => userId)} />
+              <AssigneeTable
+                slug={params.slug}
+                meetId={meeting.id}
+                ids={meeting.users.map(({ userId }) => userId)}
+              />
             </Suspense>
           </div>
           <div>

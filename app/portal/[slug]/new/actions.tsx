@@ -15,15 +15,18 @@ export async function createMeeting(
   const user = (await currentUser())!;
   const org = await slugOrgGuard(user.id, slug);
   const parsed = createMeetingSchema.parse(meetingDetails);
-  await db.insert(meets).values([
-    {
-      title: parsed.title,
-      description: parsed.description,
-      orgId: org.id,
-      dueDate: new Date(parsed.dueDate),
-      creatorId: user.id,
-    },
-  ]);
+  const [meet] = await db
+    .insert(meets)
+    .values([
+      {
+        title: parsed.title,
+        description: parsed.description,
+        orgId: org.id,
+        dueDate: new Date(parsed.dueDate),
+        creatorId: user.id,
+      },
+    ])
+    .returning();
 
-  redirect("/portal/meetings");
+  redirect(`/portal/${slug}/${meet.id}`);
 }

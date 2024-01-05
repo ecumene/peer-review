@@ -27,10 +27,9 @@ import Link from "next/link";
 import { Meet, MeetUser, meets } from "@/app/schema";
 import UserList from "@/components/ui/user-list";
 import { Suspense } from "react";
-import { eq, not } from "drizzle-orm";
 import { slugOrgGuard } from "@/lib/auth-utils";
 
-const meetingList = (list: (Meet & { users: MeetUser[] })[]) =>
+const meetingList = (slug: string, list: (Meet & { users: MeetUser[] })[]) =>
   list.map((meet) => (
     <Card key={meet.id} className="shadow-lg">
       <CardHeader>
@@ -46,7 +45,7 @@ const meetingList = (list: (Meet & { users: MeetUser[] })[]) =>
       <CardContent className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
-            href={`/portal/meetings/${meet.id}`}
+            href={`/portal/${slug}/${meet.id}`}
             className={buttonVariants()}
           >
             Details
@@ -148,7 +147,7 @@ export default async function Page({ params }: { params: Params }) {
           <div className="grid gap-6">
             <div className="flex justify-between">
               <h2 className="text-2xl font-bold">Your Meetings</h2>
-              <Link href="/portal/meetings/new" className={buttonVariants()}>
+              <Link href={`/portal/${slug}/new`} className={buttonVariants()}>
                 Schedule a new meeting
                 <CalendarDaysIcon className="ml-2 h-4 w-4" />
               </Link>
@@ -169,7 +168,7 @@ export default async function Page({ params }: { params: Params }) {
                   </CardContent>
                   <CardFooter className="flex justify-center p-4">
                     <Link
-                      href="/portal/meetings/new"
+                      href={`/portal/${slug}/new`}
                       className={buttonVariants()}
                     >
                       Schedule a new meeting
@@ -184,7 +183,7 @@ export default async function Page({ params }: { params: Params }) {
                     created by you
                     <hr className="flex-1 border-current my-auto ml-2" />
                   </div>
-                  {meetingList(createdByYou)}
+                  {meetingList(slug, createdByYou)}
                 </>
               )}
               {attending.length !== 0 && (
@@ -193,7 +192,7 @@ export default async function Page({ params }: { params: Params }) {
                     attending
                     <hr className="flex-1 border-current my-auto ml-2" />
                   </div>
-                  {meetingList(attending)}
+                  {meetingList(slug, attending)}
                 </>
               )}
             </div>
